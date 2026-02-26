@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyo
+*.pyd
+*.pdb
+*.sqlite3
+*.db
+*.log
+*.pot
+*.mo
+*.env
+.env
+.venv/
+venv/
+ENV/
+.envrc
+pip-log.txt
+pip-delete-this-directory.txt
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+bun.lockb
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test
+coverage/
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Docker
+*.pid
+
+# Misc
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# System
+Thumbs.db
+Desktop.ini
+
+# Ignore credentials and OAuth tokens
+credentials.json
+token.pickle
+token.pkl
+
+# Ignore static build outputs
+resume-seer-dash/dist/
+resume-seer-dash/.next/
+resume-seer-dash/.output/

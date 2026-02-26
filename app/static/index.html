@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR AI Agent — Testing Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #4F46E5;
+      --brand-light: #EEF2FF;
+      --brand-dark: #3730A3;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+      --error: #DC2626;
+      --error-bg: #FEF2F2;
+      --warn: #D97706;
+      --warn-bg: #FFFBEB;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text: #1E293B;
+      --muted: #64748B;
+      --label: #374151;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,.10);
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--brand);
+      color: #fff;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 56px;
+      box-shadow: var(--shadow-lg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: -.5px; }
+    header .subtitle { font-size: .8rem; opacity: .75; }
+    header .badge {
+      margin-left: auto;
+      font-size: .7rem;
+      background: rgba(255,255,255,.2);
+      border-radius: 99px;
+      padding: .25rem .75rem;
+    }
+
+    /* ── Base URL bar ── */
+    .url-bar {
+      background: var(--brand-dark);
+      padding: .55rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .url-bar label { color: rgba(255,255,255,.75); font-size: .75rem; white-space: nowrap; }
+    .url-bar input {
+      flex: 1;
+      max-width: 320px;
+      padding: .3rem .6rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      font-size: .8rem;
+    }
+    .url-bar input::placeholder { color: rgba(255,255,255,.5); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: .85rem 1.1rem;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--brand); }
+    .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+    /* ── Main layout ── */
+    main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: .25rem;
+    }
+    .card .desc {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Forms ── */
+    .form-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 180px; }
+    .form-group.full { flex-basis: 100%; }
+    label { font-size: .8rem; font-weight: 500; color: var(--label); }
+    input[type="text"], input[type="email"], input[type="number"],
+    input[type="date"], input[type="time"], textarea, select {
+      padding: .55rem .75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .875rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+    }
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .6rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-primary:hover { background: var(--brand-dark); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-sm { padding: .35rem .75rem; font-size: .78rem; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Alerts ── */
+    .alert {
+      padding: .85rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: .84rem;
+      margin-top: 1rem;
+      border-left: 3px solid;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert.success { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .alert.error   { background: var(--error-bg);   border-color: var(--error);   color: var(--error); }
+    .alert.info    { background: var(--brand-light); border-color: var(--brand);   color: var(--brand-dark); }
+    .alert pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: .78rem;
+      margin-top: .4rem;
+    }
+
+    /* ── Result table ── */
+    .result-table-wrap { overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    thead tr { background: var(--brand-light); }
+    th { text-align: left; padding: .55rem .75rem; font-weight: 600; color: var(--brand-dark); white-space: nowrap; }
+    td { padding: .55rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .score-pill {
+      display: inline-block;
+      padding: .15rem .5rem;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: .75rem;
+    }
+    .score-high { background: var(--success-bg); color: var(--success); }
+    .score-mid  { background: var(--warn-bg);    color: var(--warn); }
+    .score-low  { background: var(--error-bg);   color: var(--error); }
+
+    /* ── Evaluation detail card ── */
+    .eval-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+    .eval-stat {
+      background: var(--brand-light);
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      text-align: center;
+    }
+    .eval-stat .val { font-size: 1.4rem; font-weight: 700; color: var(--brand-dark); }
+    .eval-stat .lbl { font-size: .7rem; color: var(--muted); margin-top: .2rem; }
+
+    .url-list { margin-top: .75rem; }
+    .url-list a {
+      display: block;
+      font-size: .78rem;
+      color: var(--brand);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: .25rem;
+    }
+
+    /* ── Interview result ── */
+    .meet-link-box {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      background: var(--success-bg);
+      border: 1px solid #A7F3D0;
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      margin-top: 1rem;
+    }
+    .meet-link-box .icon { font-size: 1.5rem; }
+    .meet-link-box a { font-weight: 600; color: var(--success); font-size: .9rem; word-break: break-all; }
+
+    /* ── Agent chat ── */
+    .agent-output {
+      background: #0F172A;
+      color: #E2E8F0;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: .8rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 120px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .agent-output.show { display: block; }
+    .agent-thinking {
+      color: #94A3B8;
+      font-style: italic;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    /* ── Misc ── */
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: .5rem;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .tip {
+      background: var(--warn-bg);
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius-sm);
+      padding: .55rem .85rem;
+      font-size: .78rem;
+      color: #92400E;
+      margin-bottom: 1rem;
+    }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div>
+    <div class="logo">🤖 HR AI Agent</div>
+    <div class="subtitle">Recruitment Automation Dashboard</div>
+  </div>
+  <span class="badge">Testing UI</span>
+</header>
+
+<!-- ── Base URL ── -->
+<div class="url-bar">
+  <label>Backend URL</label>
+  <input id="baseUrl" type="text" value="http://localhost:8000" placeholder="http://localhost:8000" />
+</div>
+
+<!-- ── Tabs ── -->
+<div class="tabs">
+  <div class="tab active" data-panel="search">🔍 Candidate Search</div>
+  <div class="tab" data-panel="evaluate">📊 Evaluate</div>
+  <div class="tab" data-panel="schedule">📅 Schedule Interview</div>
+  <div class="tab" data-panel="sendmail">✉️ Send Email</div>
+  <div class="tab" data-panel="agent">🤖 AI Agent</div>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════════
+       PANEL 1 — Candidate Search
+  ══════════════════════════════════════ -->
+  <div class="panel active" id="panel-search">
+    <div class="card">
+      <h2>Candidate Search</h2>
+      <p class="desc"><code>POST /candidates/search</code> — Vector-search Pinecone for candidates matching a job description.</p>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="search-jd">Job Description *</label>
+          <textarea id="search-jd" rows="5" placeholder="e.g. We are looking for a senior ML Engineer with 5+ years of experience in Python, PyTorch, and deploying models at scale..."></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="max-width:160px">
+          <label for="search-topk">Top K results</label>
+          <input type="number" id="search-topk" value="5" min="1" max="50" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-search">
+        <span id="btn-search-text">Search Candidates</span>
+        <span id="btn-search-spinner" class="spinner" style="display:none"></span>
+      </button>
+
+      <div class="alert" id="search-alert"></div>
+
+      <div class="result-table-wrap" id="search-results-wrap" style="display:none">
+        <hr />
+        <div class="meta-row">
+          <strong id="search-count"></strong>
+          <span id="search-time"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Candidate ID (Email)</th>
+              <th>Similarity</th>
+              <th>ATS Score</th>
+              <th>Final Score</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="search-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PANEL 2 — Evaluate Candidate
+  ══════════════════════════════════════ -->
+  <div class="panel" id="panel-evaluate">
+    <div class="card">
+      <h2>Evaluate Candidate</h2>
+      <p class="desc"><code>GET /candidates/{email}/evaluate</code> — Deep multi-factor evaluation: similarity, ATS score, credibility check (live URLs + GitHub).</p>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="eval-email">Candidate Email (Pinecone ID) *</label>
+          <input type="email" id="eval-email" placeholder="candidate@example.com" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-eval">
+        <span id="btn-eval-text">Evaluate</span>
+        <span id="btn-eval-spinner" class="spinner" style="display:none"></span>
+      </button>
+
+      <div class="alert" id="eval-alert"></div>
+
+      <div id="eval-result" style="display:none">
+        <hr />
+        <div class="eval-grid">
+          <div class="eval-stat">
+            <div class="val" id="ev-final">—</div>
+            <div class="lbl">Final Score</div>
+          </div>
+          <div class="eval-stat">
+            <div class="val" id="ev-sim">—</div>
+            <div class="lbl">Similarity</div>
+          </div>
+          <div class="eval-stat">
+            <div class="val" id="ev-ats">—</div>
+            <div class="lbl">ATS Score</div>
+          </div>
+          <div class="eval-stat">
+            <div class="val" id="ev-cred">—</div>
+            <div class="lbl">Credibility</div>
+          </div>
+        </div>
+        <div class="url-list" id="ev-urls"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PANEL 3 — Schedule Interview
+  ══════════════════════════════════════ -->
+  <div class="panel" id="panel-schedule">
+    <div class="card">
+      <h2>Schedule Interview (Google Calendar + Meet)</h2>
+      <p class="desc"><code>POST /interview/schedule</code> — Creates a Google Calendar event with Meet link and sends a notification.</p>
+
+      <div class="tip">⚠️ Google Calendar OAuth must be pre-authorised. Run <code>calendar_setup.py</code> first if you see auth errors.</div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="sched-email">Candidate Email *</label>
+          <input type="email" id="sched-email" placeholder="candidate@example.com" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sched-date">Interview Date *</label>
+          <input type="date" id="sched-date" />
+        </div>
+        <div class="form-group">
+          <label for="sched-time">Start Time *</label>
+          <input type="time" id="sched-time" value="10:00" />
+        </div>
+        <div class="form-group">
+          <label for="sched-duration">Duration (minutes)</label>
+          <input type="number" id="sched-duration" value="60" min="15" max="240" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-sched">
+        <span id="btn-sched-text">Schedule Interview</span>
+        <span id="btn-sched-spinner" class="spinner" style="display:none"></span>
+      </button>
+
+      <div class="alert" id="sched-alert"></div>
+
+      <div id="sched-result" style="display:none">
+        <hr />
+        <div class="meet-link-box">
+          <span class="icon">📹</span>
+          <div>
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.2rem">Google Meet Link</div>
+            <a id="sched-meet-link" href="#" target="_blank" rel="noopener">—</a>
+          </div>
+        </div>
+        <div class="meta-row" style="margin-top:.75rem">
+          <span id="sched-meta"></span>
+          <span id="sched-status" class="score-pill score-high"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PANEL 4 — Send Email Invite
+  ══════════════════════════════════════ -->
+  <div class="panel" id="panel-sendmail">
+    <div class="card">
+      <h2>Send Interview Email</h2>
+      <p class="desc"><code>POST /interview/send-email</code> — Sends a formatted interview invitation via Gmail SMTP.</p>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="mail-email">Candidate Email *</label>
+          <input type="email" id="mail-email" placeholder="candidate@example.com" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="mail-date">Interview Date *</label>
+          <input type="date" id="mail-date" />
+        </div>
+        <div class="form-group full">
+          <label for="mail-link">Google Meet Link *</label>
+          <input type="text" id="mail-link" placeholder="https://meet.google.com/abc-defg-hij" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-mail">
+        <span id="btn-mail-text">Send Email</span>
+        <span id="btn-mail-spinner" class="spinner" style="display:none"></span>
+      </button>
+
+      <div class="alert" id="mail-alert"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PANEL 5 — AI Agent
+  ══════════════════════════════════════ -->
+  <div class="panel" id="panel-agent">
+    <div class="card">
+      <h2>AI Agent (LangChain ReAct — Groq LLaMA 3.3 70B)</h2>
+      <p class="desc"><code>POST /agent/run</code> — Send a natural language instruction. The agent autonomously chains search, evaluation, scheduling and email tools to fulfil your request.</p>
+
+      <div class="tip">💡 Example queries:<br>
+        • "Find the top 5 ML engineers and evaluate each one."<br>
+        • "Find 3 candidates for a backend Python role and schedule interviews on 2026-03-10 at 11:00."<br>
+        • "Evaluate candidate john@example.com and if score &gt; 0.7, schedule an interview."
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="agent-query">Your Instruction *</label>
+          <textarea id="agent-query" rows="4" placeholder="Find the top 3 ML engineers, evaluate them, and schedule interviews for those with a final score above 0.75..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-agent">
+        <span id="btn-agent-text">Run Agent</span>
+        <span id="btn-agent-spinner" class="spinner" style="display:none"></span>
+      </button>
+
+      <pre class="agent-output" id="agent-output"></pre>
+      <div class="alert" id="agent-alert"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const BASE = () => ($('baseUrl').value || 'http://localhost:8000').replace(/\/$/, '');
+
+function setLoading(btnId, spinnerId, loading) {
+  $(btnId).disabled = loading;
+  $(spinnerId).style.display = loading ? 'inline-block' : 'none';
+}
+
+function showAlert(id, type, title, detail) {
+  const el = $(id);
+  el.className = `alert ${type} show`;
+  el.innerHTML = `<strong>${title}</strong>${detail ? `<pre>${detail}</pre>` : ''}`;
+}
+
+function hideAlert(id) {
+  const el = $(id);
+  el.className = 'alert';
+  el.innerHTML = '';
+}
+
+function scoreClass(v) {
+  if (v >= 0.7) return 'score-high';
+  if (v >= 0.45) return 'score-mid';
+  return 'score-low';
+}
+
+function fmt(v) { return typeof v === 'number' ? v.toFixed(4) : v ?? '—'; }
+function fmtPct(v) { return typeof v === 'number' ? v.toFixed(1) : v ?? '—'; }
+
+async function apiFetch(path, opts = {}) {
+  const url = BASE() + path;
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  const json = await res.json().catch(() => ({ detail: res.statusText }));
+  if (!res.ok) throw new Error(JSON.stringify(json, null, 2));
+  return json;
+}
+
+// ── Tabs ─────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+
+// ── Auto-fill today's date on date inputs ────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  ['sched-date', 'mail-date'].forEach(id => { $(id).value = today; });
+});
+
+// ══════════════════════════════════════════════════════════
+// PANEL 1 — Candidate Search
+// ══════════════════════════════════════════════════════════
+$('btn-search').addEventListener('click', async () => {
+  const jd   = $('search-jd').value.trim();
+  const topk = parseInt($('search-topk').value, 10) || 5;
+  hideAlert('search-alert');
+
+  if (!jd || jd.length < 10) {
+    showAlert('search-alert', 'error', 'Job description must be at least 10 characters.');
+    return;
+  }
+
+  setLoading('btn-search', 'btn-search-spinner', true);
+  $('search-results-wrap').style.display = 'none';
+
+  try {
+    const t0   = Date.now();
+    const data = await apiFetch('/candidates/search', {
+      method: 'POST',
+      body: JSON.stringify({ job_description: jd, top_k: topk }),
+    });
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
+
+    $('search-count').textContent = `${data.total_results} candidates found`;
+    $('search-time').textContent  = `${elapsed}s`;
+
+    const tbody = $('search-tbody');
+    tbody.innerHTML = '';
+
+    (data.candidates || []).forEach((c, i) => {
+      const row = document.createElement('tr');
+      const cls = scoreClass(c.final_score);
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td style="font-family:monospace;font-size:.8rem">${c.id}</td>
+        <td><span class="score-pill ${scoreClass(c.similarity_score)}">${(c.similarity_score * 100).toFixed(1)}%</span></td>
+        <td>${fmtPct(c.ats_score)}</td>
+        <td><span class="score-pill ${cls}">${fmt(c.final_score)}</span></td>
+        <td>
+          <button class="btn btn-primary btn-sm" onclick="prefillEval('${c.id}')">Evaluate</button>
+        </td>`;
+      tbody.appendChild(row);
+    });
+
+    $('search-results-wrap').style.display = 'block';
+    if (!data.candidates?.length) showAlert('search-alert', 'info', 'No candidates found for this query.');
+  } catch (e) {
+    showAlert('search-alert', 'error', 'Request failed', e.message);
+  } finally {
+    setLoading('btn-search', 'btn-search-spinner', false);
+  }
+});
+
+function prefillEval(email) {
+  $('eval-email').value = email;
+  document.querySelector('[data-panel="evaluate"]').click();
+}
+
+// ══════════════════════════════════════════════════════════
+// PANEL 2 — Evaluate Candidate
+// ══════════════════════════════════════════════════════════
+$('btn-eval').addEventListener('click', async () => {
+  const email = $('eval-email').value.trim();
+  hideAlert('eval-alert');
+  $('eval-result').style.display = 'none';
+
+  if (!email) {
+    showAlert('eval-alert', 'error', 'Please enter a candidate email.');
+    return;
+  }
+
+  setLoading('btn-eval', 'btn-eval-spinner', true);
+  try {
+    const data = await apiFetch(`/candidates/${encodeURIComponent(email)}/evaluate`);
+
+    $('ev-final').textContent = fmt(data.final_score);
+    $('ev-sim').textContent   = fmt(data.similarity_score);
+    $('ev-ats').textContent   = fmtPct(data.ats_score);
+    $('ev-cred').textContent  = fmtPct(data.credibility_score) + ' / 50';
+
+    const urlsEl = $('ev-urls');
+    if (data.urls_checked?.length) {
+      urlsEl.innerHTML = `<div style="font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:.4rem">URLs checked (${data.urls_checked.length})</div>` +
+        data.urls_checked.map(u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`).join('');
+    } else {
+      urlsEl.innerHTML = '<div style="font-size:.75rem;color:var(--muted)">No URLs found in resume.</div>';
+    }
+
+    $('eval-result').style.display = 'block';
+    showAlert('eval-alert', 'success', `Evaluation complete for ${data.email_id}`);
+  } catch (e) {
+    showAlert('eval-alert', 'error', 'Evaluation failed', e.message);
+  } finally {
+    setLoading('btn-eval', 'btn-eval-spinner', false);
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// PANEL 3 — Schedule Interview
+// ══════════════════════════════════════════════════════════
+$('btn-sched').addEventListener('click', async () => {
+  const email    = $('sched-email').value.trim();
+  const date     = $('sched-date').value;
+  const time     = $('sched-time').value;
+  const duration = parseInt($('sched-duration').value, 10) || 60;
+  hideAlert('sched-alert');
+  $('sched-result').style.display = 'none';
+
+  if (!email || !date || !time) {
+    showAlert('sched-alert', 'error', 'Email, date and time are required.');
+    return;
+  }
+
+  setLoading('btn-sched', 'btn-sched-spinner', true);
+  try {
+    const data = await apiFetch('/interview/schedule', {
+      method: 'POST',
+      body: JSON.stringify({
+        candidate_email: email,
+        interview_date: date,
+        start_time: time,
+        duration_minutes: duration,
+      }),
+    });
+
+    const link = data.meet_link || '#';
+    $('sched-meet-link').href        = link;
+    $('sched-meet-link').textContent = link;
+    $('sched-meta').textContent = `${data.candidate_email} · ${data.interview_date} at ${data.start_time}`;
+    $('sched-status').textContent = data.status || 'scheduled';
+    $('sched-result').style.display = 'block';
+    showAlert('sched-alert', 'success', 'Interview scheduled successfully!');
+
+    // Pre-fill send-email panel
+    $('mail-email').value = email;
+    $('mail-date').value  = date;
+    $('mail-link').value  = link;
+  } catch (e) {
+    showAlert('sched-alert', 'error', 'Scheduling failed', e.message);
+  } finally {
+    setLoading('btn-sched', 'btn-sched-spinner', false);
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// PANEL 4 — Send Email
+// ══════════════════════════════════════════════════════════
+$('btn-mail').addEventListener('click', async () => {
+  const email = $('mail-email').value.trim();
+  const date  = $('mail-date').value;
+  const link  = $('mail-link').value.trim();
+  hideAlert('mail-alert');
+
+  if (!email || !date || !link) {
+    showAlert('mail-alert', 'error', 'All fields are required.');
+    return;
+  }
+
+  setLoading('btn-mail', 'btn-mail-spinner', true);
+  try {
+    const data = await apiFetch('/interview/send-email', {
+      method: 'POST',
+      body: JSON.stringify({
+        candidate_email: email,
+        interview_date: date,
+        meet_link: link,
+      }),
+    });
+    showAlert('mail-alert', 'success', data.message || 'Email sent successfully!');
+  } catch (e) {
+    showAlert('mail-alert', 'error', 'Email delivery failed', e.message);
+  } finally {
+    setLoading('btn-mail', 'btn-mail-spinner', false);
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// PANEL 5 — AI Agent
+// ══════════════════════════════════════════════════════════
+$('btn-agent').addEventListener('click', async () => {
+  const query = $('agent-query').value.trim();
+  hideAlert('agent-alert');
+
+  if (!query) {
+    showAlert('agent-alert', 'error', 'Please enter a query for the agent.');
+    return;
+  }
+
+  const out = $('agent-output');
+  out.classList.add('show');
+  out.innerHTML = '<span class="agent-thinking">⟳  Agent is thinking… this may take 30–60 seconds</span>';
+
+  setLoading('btn-agent', 'btn-agent-spinner', true);
+  try {
+    const data = await apiFetch('/agent/run', {
+      method: 'POST',
+      body: JSON.stringify({ user_query: query }),
+    });
+    out.textContent = data.agent_response || JSON.stringify(data, null, 2);
+    showAlert('agent-alert', 'success', 'Agent completed successfully.');
+  } catch (e) {
+    out.textContent = '';
+    out.classList.remove('show');
+    showAlert('agent-alert', 'error', 'Agent run failed', e.message);
+  } finally {
+    setLoading('btn-agent', 'btn-agent-spinner', false);
+  }
+});
+</script>
+</body>
+</html>
