@@ -1,6 +1,7 @@
-# 🤖 HR AI Recruitment Agent
+# 🤖  Agentic AI Recruiter
 
-A **production-ready AI-powered HR Recruitment Automation API** built with FastAPI, LangChain, Pinecone, Google Calendar and SMTP. It automates the end-to-end pipeline from resume retrieval and candidate evaluation to interview scheduling and email invitations.
+
+A **AI-powered HR Recruitment Automation** built with FastAPI, LangChain, Pinecone, Google Calendar and SMTP. It automates the end-to-end pipeline from resume retrieval and candidate evaluation to interview scheduling and email invitations.
 
 ---
 
