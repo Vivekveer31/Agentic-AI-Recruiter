@@ -20,7 +20,6 @@ async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
     valid_keys: list[str] = getattr(settings, "VALID_API_KEYS", "").split(",")
     valid_keys = [k.strip() for k in valid_keys if k.strip()]
 
-    # If no keys are configured, skip auth (dev mode)
     if not valid_keys:
         return ""
 
